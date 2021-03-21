@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
 using Server.Data;
+using System;
 using System.Threading.Tasks;
 
 namespace Server
@@ -12,30 +15,57 @@ namespace Server
     {
         public static async Task Main(string[] args)
         {
-            using var host = CreateHostBuilder(args).Build();
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
 
-            using var scope = host.Services.CreateScope();
+            try
+            {
+                Log.Information("Creating host ...");
+                using var host = CreateHostBuilder(args).Build();
+                Log.Information("Creating scope ...");
+                using var scope = host.Services.CreateScope();
 
-            var context = scope
-                .ServiceProvider
-                .GetRequiredService<AppDbContext>();
-            await context.Database.MigrateAsync();
+                var context = scope
+                    .ServiceProvider
+                    .GetRequiredService<AppDbContext>();
 
-            var userManager = scope
-                .ServiceProvider
-                .GetRequiredService<UserManager<IdentityUser>>();
+                Log.Information("Start pending migration ...");
+                await context.Database.MigrateAsync();
 
-            var roleManager = scope
-                .ServiceProvider
-                .GetRequiredService<RoleManager<IdentityRole>>();
+                var userManager = scope
+                    .ServiceProvider
+                    .GetRequiredService<UserManager<IdentityUser>>();
 
-            await Seed.SeedDatabaseAsync(userManager, roleManager);
+                var roleManager = scope
+                    .ServiceProvider
+                    .GetRequiredService<RoleManager<IdentityRole>>();
 
-            await host.RunAsync();
+                Log.Information("Start databse seed method ...");
+                await Seed.SeedDatabaseAsync(userManager, roleManager);
+
+                Log.Information("Starting host ...");
+                await host.RunAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex.ToString());
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSerilog((context, services, configuration) => configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
