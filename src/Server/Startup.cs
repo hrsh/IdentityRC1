@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Server.Data;
+using System;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -14,16 +16,21 @@ namespace Server
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
+        private readonly IConfiguration _configuration;
 
-        public Startup(IConfiguration configuration) =>
-            Configuration = configuration;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public Startup(
+            IConfiguration configuration,
+            IWebHostEnvironment webHostEnvironment) =>
+            (_configuration, _webHostEnvironment) = (configuration, webHostEnvironment);
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>(cfg =>
             {
-                cfg.UseSqlite(Configuration.GetConnectionString("identity-rc1"));
+                cfg.UseSqlite(_configuration.GetConnectionString("identity-rc1-sqlite"));
+                //cfg.UseSqlServer(_configuration.GetConnectionString("identity-rc1-sql"));
                 cfg.UseOpenIddict();
             });
 
@@ -41,27 +48,55 @@ namespace Server
             services.AddOpenIddict()
                 .AddCore(core =>
                 {
-                    core.UseEntityFrameworkCore()
-                    .UseDbContext<AppDbContext>();
+                    core.UseEntityFrameworkCore(a =>
+                    {
+                        a.UseDbContext<AppDbContext>();
+                    });
                 })
                 .AddServer(server =>
                 {
-                    server.SetAuthorizationEndpointUris("")
-                    .SetLogoutEndpointUris("")
-                    .SetIntrospectionEndpointUris("")
-                    .SetUserinfoEndpointUris("");
+                    server.SetAuthorizationEndpointUris("/connect/authorize")
+                    .SetLogoutEndpointUris("/connect/logout")
+                    .SetIntrospectionEndpointUris("/connect/introspect")
+                    .SetUserinfoEndpointUris("/connect/userinfo")
+                    .SetTokenEndpointUris("/connect/token");
 
                     server.RegisterScopes("email", "profile", "roles");
+
+                    server.AllowAuthorizationCodeFlow();
 
                     server.AddEncryptionKey(
                         new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(Consts.EncryptionKey)));
 
-                    server.AddSigningCertificate(new X509Certificate2(fileName: ""));
+                    //server.AddEncryptionKey(
+                    //    new SymmetricSecurityKey(
+                    //        Convert.FromBase64String(Consts.EncryptionKey)));
+
+                    var fileName = _configuration.GetSection("Certificate:FileName").Value;
+                    var password = _configuration.GetSection("Certificate:Password").Value;
+                    var filePath = Path.Combine(_webHostEnvironment.ContentRootPath, fileName);
+                    server.AddSigningCertificate(
+                        new X509Certificate2(fileName: filePath, password: password));
+
+                    //server.AddDevelopmentSigningCertificate();
+
+                    server
+                    .UseAspNetCore()
+                    .EnableAuthorizationEndpointPassthrough()
+                    .EnableLogoutEndpointPassthrough()
+                    .EnableUserinfoEndpointPassthrough()
+                    .EnableStatusCodePagesIntegration()
+                    .EnableTokenEndpointPassthrough();
+                })
+                .AddValidation(opt =>
+                {
+                    opt.UseLocalServer();
+                    opt.UseAspNetCore();
                 });
 
             services.AddControllersWithViews();
-            services.AddRazorPages();
+            services.AddRazorPages().AddRazorRuntimeCompilation();
 
             services.AddHostedService<IdentityWorker>();
         }
@@ -73,6 +108,7 @@ namespace Server
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -80,6 +116,7 @@ namespace Server
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
             });
         }

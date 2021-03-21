@@ -23,8 +23,8 @@ namespace Server
                 .ServiceProvider
                 .GetRequiredService<AppDbContext>();
 
-            if (!await context.Database.EnsureCreatedAsync())
-                throw new InvalidOperationException("Database not found!");
+            //if (!await context.Database.EnsureCreatedAsync())
+            //    throw new InvalidOperationException("Database not found!");
 
             await CreateApplicationAsync();
             await CretaeScopesAsync();
@@ -129,9 +129,7 @@ namespace Server
             }
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+        public Task StopAsync(CancellationToken cancellationToken) =>
+            Task.CompletedTask;
     }
 }
