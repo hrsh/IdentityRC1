@@ -5,7 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Server.Data;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace Server
 {
@@ -21,6 +24,7 @@ namespace Server
             services.AddDbContext<AppDbContext>(cfg =>
             {
                 cfg.UseSqlite(Configuration.GetConnectionString("identity-rc1"));
+                cfg.UseOpenIddict();
             });
 
             services.AddIdentity<IdentityUser, IdentityRole>()
@@ -29,11 +33,37 @@ namespace Server
 
             services.Configure<IdentityOptions>(cfg =>
             {
-
+                cfg.ClaimsIdentity.UserNameClaimType = "name";
+                cfg.ClaimsIdentity.UserIdClaimType = "sub";
+                cfg.ClaimsIdentity.RoleClaimType = "role";
             });
+
+            services.AddOpenIddict()
+                .AddCore(core =>
+                {
+                    core.UseEntityFrameworkCore()
+                    .UseDbContext<AppDbContext>();
+                })
+                .AddServer(server =>
+                {
+                    server.SetAuthorizationEndpointUris("")
+                    .SetLogoutEndpointUris("")
+                    .SetIntrospectionEndpointUris("")
+                    .SetUserinfoEndpointUris("");
+
+                    server.RegisterScopes("email", "profile", "roles");
+
+                    server.AddEncryptionKey(
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(Consts.EncryptionKey)));
+
+                    server.AddSigningCertificate(new X509Certificate2(fileName: ""));
+                });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddHostedService<IdentityWorker>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -44,6 +74,8 @@ namespace Server
             }
 
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
