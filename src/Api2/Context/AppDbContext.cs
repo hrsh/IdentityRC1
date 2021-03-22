@@ -1,5 +1,6 @@
 ﻿using Api2.Entities;
 using Microsoft.EntityFrameworkCore;
+using Shared;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

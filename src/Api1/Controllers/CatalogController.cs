@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Validation.AspNetCore;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Api1.Controllers
@@ -20,7 +21,7 @@ namespace Api1.Controllers
         }
 
         [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
-        [HttpGet("index")]
+        [HttpGet("list")]
         public async Task<IActionResult> Index()
         {
             var identity = User.Identity as ClaimsIdentity;
@@ -29,6 +30,14 @@ namespace Api1.Controllers
             var list = await _context.Catalogs.ToListAsync();
 
             return Ok(list);
+        }
+
+        [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id, CancellationToken ct)
+        {
+            var t = await _context.Catalogs.FirstOrDefaultAsync(a => a.Id == id, ct);
+            return t is null ? NoContent() : Ok(t);
         }
     }
 }

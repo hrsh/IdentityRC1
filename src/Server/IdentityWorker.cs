@@ -42,6 +42,8 @@ namespace Server
                     {
                         ClientId = ServiceDefaultConfig.WebClientId,
                         DisplayName = ServiceDefaultConfig.WebClientDisplayName,
+                        ClientSecret = ServiceDefaultConfig.WebClientSecret,
+                        ConsentType = ConsentTypes.Explicit,
                         PostLogoutRedirectUris =
                         {
                             new Uri($"{ServiceDefaultConfig.WebClientUrl}signout-oidc")
@@ -62,7 +64,11 @@ namespace Server
                             Permissions.Scopes.Roles,
                             Permissions.Prefixes.Scope + ServiceDefaultConfig.Api1Id,
                             Permissions.Prefixes.Scope + ServiceDefaultConfig.Api2Id
-                        }
+                        },
+                        Requirements =
+                    {
+                        Requirements.Features.ProofKeyForCodeExchange
+                    }
                     };
                     await manager.CreateAsync(descriptor, ct);
                 }

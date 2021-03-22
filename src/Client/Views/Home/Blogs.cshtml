@@ -1,0 +1,22 @@
+﻿@model Shared.Blog[]
+
+<h1>Blogs</h1>
+@if (Model is not null)
+{
+    if(Model.Any())
+    {
+        foreach (var blog in Model)
+        {
+            <div class="card">
+                <div class="card-header">
+                    @blog.Title
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">@blog.Title</h5>
+                    <p class="card-text">@blog.Body</p>
+                    <a href="#" class="btn btn-primary">Read more</a>
+                </div>
+            </div>
+        }
+    }
+}

@@ -1,9 +1,9 @@
 ﻿using Api2.Context;
-using Api2.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Validation.AspNetCore;
+using Shared;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,5 +27,13 @@ namespace Api2.Controllers
         [Route("list")]
         public async Task<IEnumerable<Blog>> Index(CancellationToken ct) =>
             await _context.Blogs.ToListAsync(ct);
+
+        [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id, CancellationToken ct)
+        {
+            var t = await _context.Blogs.FirstOrDefaultAsync(a => a.Id == id, ct);
+            return t is null ? NoContent() : Ok(t);
+        }
     }
 }

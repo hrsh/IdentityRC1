@@ -1,4 +1,4 @@
-﻿namespace Api2.Entities
+﻿namespace Shared
 {
     public class Blog
     {
