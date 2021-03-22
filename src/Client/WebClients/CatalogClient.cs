@@ -1,5 +1,6 @@
 ﻿using Shared;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,9 +22,12 @@ namespace Client.WebClients
             _client = client;
         }
 
-        public async Task<Catalog[]> GetCatalogesAsync(CancellationToken ct)
+        public async Task<Catalog[]> GetCatalogesAsync(string token, CancellationToken ct)
         {
-            var responseMessage = await _client.GetAsync("/list", ct);
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+            var responseMessage = await _client.GetAsync("api/v1/catalog/list", ct);
+            responseMessage.EnsureSuccessStatusCode();
             var stream = await responseMessage.Content.ReadAsStreamAsync(ct);
             return await JsonSerializer.DeserializeAsync<Catalog[]>(stream, _options ,ct);
         }

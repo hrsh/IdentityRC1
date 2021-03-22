@@ -38,9 +38,9 @@ namespace Api2
                 {
                     options.SetIssuer(ServiceDefaultConfig.ServerUrl);
                     options.AddAudiences(ServiceDefaultConfig.Api2Id);
-                    options.AddEncryptionKey(
-                        new SymmetricSecurityKey(
-                            Convert.FromBase64String(ServiceDefaultConfig.EncryptionKey)));
+                    options.UseIntrospection()
+                        .SetClientId(ServiceDefaultConfig.Api2Id)
+                        .SetClientSecret(ServiceDefaultConfig.Api2Secret);
                     options.UseSystemNetHttp();
                     options.UseAspNetCore();
                 });

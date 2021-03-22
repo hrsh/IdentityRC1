@@ -64,8 +64,7 @@ namespace Server
 
                     server.RegisterScopes("email", "profile", "roles");
 
-                    server.AllowAuthorizationCodeFlow()
-                        .AllowRefreshTokenFlow();
+                    server.AllowAuthorizationCodeFlow();
 
                     server.AddEncryptionKey(
                         new SymmetricSecurityKey(
@@ -73,7 +72,7 @@ namespace Server
 
                     //server.AddEncryptionKey(
                     //    new SymmetricSecurityKey(
-                    //        Convert.FromBase64String(Consts.EncryptionKey)));
+                    //        Convert.FromBase64String(ServiceDefaultConfig.DigitalKey)));
 
                     var fileName = _configuration.GetSection("Certificate:FileName").Value;
                     var password = _configuration.GetSection("Certificate:Password").Value;
@@ -81,15 +80,12 @@ namespace Server
                     server.AddSigningCertificate(
                         new X509Certificate2(fileName: filePath, password: password));
 
-                    //server.AddDevelopmentSigningCertificate();
-
-                    server
-                    .UseAspNetCore()
-                    .EnableAuthorizationEndpointPassthrough()
-                    .EnableLogoutEndpointPassthrough()
-                    .EnableUserinfoEndpointPassthrough()
-                    .EnableStatusCodePagesIntegration()
-                    .EnableTokenEndpointPassthrough();
+                    server.UseAspNetCore()
+                           .EnableAuthorizationEndpointPassthrough()
+                           .EnableLogoutEndpointPassthrough()
+                           .EnableTokenEndpointPassthrough()
+                           .EnableUserinfoEndpointPassthrough()
+                           .EnableStatusCodePagesIntegration();
                 })
                 .AddValidation(opt =>
                 {

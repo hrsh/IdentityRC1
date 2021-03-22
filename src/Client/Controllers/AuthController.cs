@@ -8,7 +8,7 @@ namespace Client.Controllers
     public class AuthController : Controller
     {
         [HttpGet("~/login")]
-        public IActionResult Login() =>
+        public IActionResult LogIn() =>
             Challenge(
                 new AuthenticationProperties
                 {
@@ -17,7 +17,7 @@ namespace Client.Controllers
                 OpenIdConnectDefaults.AuthenticationScheme);
 
         [HttpGet("~/logout"), HttpPost("~/logout")]
-        public IActionResult Logout() =>
+        public IActionResult LogOut() =>
             SignOut(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 OpenIdConnectDefaults.AuthenticationScheme);

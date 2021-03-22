@@ -4,6 +4,6 @@ namespace Server.Controllers
 {
     public class HomeController : Controller
     {
-        [Route("/")] public IActionResult Index() => View();
+        public IActionResult Index() => View();
     }
 }

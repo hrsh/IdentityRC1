@@ -1,0 +1,11 @@
+﻿@model Server.Controllers.LoginViewModel
+<h1>Login Page</h1>
+
+<form asp-action="Login"
+      asp-controller="Account"
+      method="post">
+    <input type="hidden" asp-for="ReturnUrl" />
+    <input type="email" asp-for="Email" />
+    <input type="password" asp-for="Password" />
+    <button type="submit">Login</button>
+</form>

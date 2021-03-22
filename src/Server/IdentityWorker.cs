@@ -38,8 +38,8 @@ namespace Server
 
                 if (await manager.FindByClientIdAsync(ServiceDefaultConfig.WebClientId, ct) is null)
                 {
-                    var logout = $"{ServiceDefaultConfig.ServerUrl}signout-callback-oidc";
-                    var login = $"{ServiceDefaultConfig.ServerUrl}signin-oidc";
+                    var logout = $"{ServiceDefaultConfig.WebClientUrl}signout-callback-oidc";
+                    var login = $"{ServiceDefaultConfig.WebClientUrl}signin-oidc";
                     var descriptor = new OpenIddictApplicationDescriptor
                     {
                         ClientId = ServiceDefaultConfig.WebClientId,
@@ -58,9 +58,10 @@ namespace Server
                         {
                             Permissions.Endpoints.Authorization,
                             Permissions.Endpoints.Logout,
-                            Permissions.ResponseTypes.IdToken,
-                            Permissions.ResponseTypes.IdTokenToken,
-                            Permissions.ResponseTypes.Token,
+                            Permissions.Endpoints.Token,
+                            Permissions.GrantTypes.AuthorizationCode,
+                            Permissions.GrantTypes.RefreshToken,
+                            Permissions.ResponseTypes.Code,
                             Permissions.Scopes.Email,
                             Permissions.Scopes.Profile,
                             Permissions.Scopes.Roles,

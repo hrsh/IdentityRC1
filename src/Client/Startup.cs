@@ -1,19 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
-using Blog.WebClients;
 using Client.WebClients;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Shared;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Client
 {
@@ -33,7 +29,7 @@ namespace Client
             {
                 options.ClientId = ServiceDefaultConfig.WebClientId;
                 options.ClientSecret = ServiceDefaultConfig.WebClientSecret;
-                options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = true;
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.SaveTokens = true;
                 options.ResponseType = OpenIdConnectResponseType.Code;
@@ -41,9 +37,11 @@ namespace Client
                 options.Authority = ServiceDefaultConfig.ServerUrl;
                 options.Scope.Add("email");
                 options.Scope.Add("roles");
+                options.Scope.Add("api1");
+                options.Scope.Add("api2");
                 options.SecurityTokenValidator = new JwtSecurityTokenHandler
                 {
-                    InboundClaimTypeMap = new Dictionary<string,string>()
+                    InboundClaimTypeMap = new Dictionary<string, string>()
                 };
                 options.TokenValidationParameters.NameClaimType = "name";
                 options.TokenValidationParameters.RoleClaimType = "role";

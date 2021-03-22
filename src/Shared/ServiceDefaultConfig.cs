@@ -13,7 +13,7 @@
         public const string Api2DisplayName = "Blog API";
 
         public const string WebClientId = "web_client";
-        public const string WebClientSecret = "e2c4d48d364349a8b0947605b183be84";
+        public const string WebClientSecret = "901564A5-E7FE-42CB-B10D-61EF6A8F3654";
         public const string WebClientUrl = "https://localhost:6004/";
         public const string WebClientDisplayName = "Web Client";
 

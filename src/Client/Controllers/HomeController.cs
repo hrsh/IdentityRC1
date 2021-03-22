@@ -1,7 +1,9 @@
-﻿using Blog.WebClients;
-using Client.WebClients;
+﻿using Client.WebClients;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,7 +19,12 @@ namespace Client.Controllers
             [FromServices] CatalogClient catalogClient,
             CancellationToken ct)
         {
-            var t = await catalogClient.GetCatalogesAsync(ct);
+            var token = await HttpContext.GetTokenAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                OpenIdConnectParameterNames.AccessToken);
+            if (string.IsNullOrWhiteSpace(token)) return BadRequest("Request not permitted");
+
+            var t = await catalogClient.GetCatalogesAsync(token, ct);
             return View(model: t);
         }
 
@@ -26,7 +33,11 @@ namespace Client.Controllers
             [FromServices] BlogClient blogClient,
             CancellationToken ct)
         {
-            var t = await blogClient.GetBlogsAsync(ct);
+            var token = await HttpContext.GetTokenAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                OpenIdConnectParameterNames.AccessToken);
+            if (string.IsNullOrWhiteSpace(token)) return BadRequest("Request not permitted");
+            var t = await blogClient.GetBlogsAsync(token, ct);
             return View(model: t);
         }
     }
