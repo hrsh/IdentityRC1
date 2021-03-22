@@ -3,7 +3,7 @@
     "Api2": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "applicationUrl": "https://localhost:6003",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

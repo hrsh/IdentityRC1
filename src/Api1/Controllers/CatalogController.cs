@@ -20,14 +20,16 @@ namespace Api1.Controllers
             _context = context;
         }
 
+        [Route("~/")] public IActionResult Index() => Ok(nameof(CatalogController));
+
         [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
         [HttpGet("list")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(CancellationToken ct)
         {
             var identity = User.Identity as ClaimsIdentity;
             if (identity is null) return BadRequest();
 
-            var list = await _context.Catalogs.ToListAsync();
+            var list = await _context.Catalogs.ToListAsync(ct);
 
             return Ok(list);
         }

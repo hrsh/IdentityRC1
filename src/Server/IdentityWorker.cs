@@ -38,19 +38,21 @@ namespace Server
 
                 if (await manager.FindByClientIdAsync(ServiceDefaultConfig.WebClientId, ct) is null)
                 {
+                    var logout = $"{ServiceDefaultConfig.ServerUrl}signout-callback-oidc";
+                    var login = $"{ServiceDefaultConfig.ServerUrl}signin-oidc";
                     var descriptor = new OpenIddictApplicationDescriptor
                     {
                         ClientId = ServiceDefaultConfig.WebClientId,
-                        DisplayName = ServiceDefaultConfig.WebClientDisplayName,
                         ClientSecret = ServiceDefaultConfig.WebClientSecret,
                         ConsentType = ConsentTypes.Explicit,
+                        DisplayName = ServiceDefaultConfig.WebClientDisplayName,
                         PostLogoutRedirectUris =
                         {
-                            new Uri($"{ServiceDefaultConfig.WebClientUrl}signout-oidc")
+                            new Uri(logout)
                         },
                         RedirectUris =
                         {
-                            new Uri($"{ServiceDefaultConfig.WebClientUrl}signin-oidc")
+                            new Uri(login)
                         },
                         Permissions =
                         {
@@ -66,9 +68,9 @@ namespace Server
                             Permissions.Prefixes.Scope + ServiceDefaultConfig.Api2Id
                         },
                         Requirements =
-                    {
-                        Requirements.Features.ProofKeyForCodeExchange
-                    }
+                        {
+                            Requirements.Features.ProofKeyForCodeExchange
+                        }
                     };
                     await manager.CreateAsync(descriptor, ct);
                 }

@@ -64,7 +64,8 @@ namespace Server
 
                     server.RegisterScopes("email", "profile", "roles");
 
-                    server.AllowAuthorizationCodeFlow();
+                    server.AllowAuthorizationCodeFlow()
+                        .AllowRefreshTokenFlow();
 
                     server.AddEncryptionKey(
                         new SymmetricSecurityKey(

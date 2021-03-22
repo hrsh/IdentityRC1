@@ -1,3 +1,4 @@
+using Figgle;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Server.Data;
+using Shared;
 using System;
 using System.Threading.Tasks;
 
@@ -15,6 +17,7 @@ namespace Server
     {
         public static async Task Main(string[] args)
         {
+            Console.WriteLine(FiggleFonts.Doom.Render(ServiceDefaultConfig.ServerDisplayName));
             Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()

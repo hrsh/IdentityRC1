@@ -16,7 +16,7 @@ namespace Client.Controllers
                 },
                 OpenIdConnectDefaults.AuthenticationScheme);
 
-        [HttpGet("~/"), HttpPost("~/")]
+        [HttpGet("~/logout"), HttpPost("~/logout")]
         public IActionResult Logout() =>
             SignOut(
                 CookieAuthenticationDefaults.AuthenticationScheme,
