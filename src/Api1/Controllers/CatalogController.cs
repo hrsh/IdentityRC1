@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Api1.Context;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using OpenIddict.Validation.AspNetCore;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Api1.Controllers
 {
@@ -6,12 +12,23 @@ namespace Api1.Controllers
     [Route("api/v1/[controller]")]
     public class CatalogController : ControllerBase
     {
-        public CatalogController()
-        {
+        private readonly AppDbContext _context;
 
+        public CatalogController(AppDbContext context)
+        {
+            _context = context;
         }
 
+        [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
         [HttpGet("index")]
-        public IActionResult Index() => Ok("Catalog controller index");
+        public async Task<IActionResult> Index()
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            if (identity is null) return BadRequest();
+
+            var list = await _context.Catalogs.ToListAsync();
+
+            return Ok(list);
+        }
     }
 }
