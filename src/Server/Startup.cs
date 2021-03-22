@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Server.Data;
+using Shared;
 using System;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
@@ -67,7 +68,7 @@ namespace Server
 
                     server.AddEncryptionKey(
                         new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(Consts.EncryptionKey)));
+                            Encoding.UTF8.GetBytes(ServiceDefaultConfig.EncryptionKey)));
 
                     //server.AddEncryptionKey(
                     //    new SymmetricSecurityKey(

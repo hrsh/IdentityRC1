@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Api2.Entities
 {
-    public class EntityConfiguration : IEntityTypeConfiguration<Blog>
+    public class BlogConfiguration : IEntityTypeConfiguration<Blog>
     {
         public void Configure(EntityTypeBuilder<Blog> builder)
         {
