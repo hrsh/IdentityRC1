@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using OpenIddict.Abstractions;
 using Server.Data;
+using Shared;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,28 +27,28 @@ namespace Server
             //if (!await context.Database.EnsureCreatedAsync())
             //    throw new InvalidOperationException("Database not found!");
 
-            await CreateApplicationAsync();
-            await CretaeScopesAsync();
+            await CreateApplicationAsync(ct);
+            await CretaeScopesAsync(ct);
 
-            async Task CreateApplicationAsync()
+            async Task CreateApplicationAsync(CancellationToken ct)
             {
                 var manager = scope
                     .ServiceProvider
                     .GetRequiredService<IOpenIddictApplicationManager>();
 
-                if (await manager.FindByClientIdAsync("web_client") is null)
+                if (await manager.FindByClientIdAsync(ServiceDefaultConfig.WebClientId, ct) is null)
                 {
                     var descriptor = new OpenIddictApplicationDescriptor
                     {
-                        ClientId = "web_client",
-                        DisplayName = "Web Client",
+                        ClientId = ServiceDefaultConfig.WebClientId,
+                        DisplayName = ServiceDefaultConfig.WebClientDisplayName,
                         PostLogoutRedirectUris =
                         {
-                            new Uri("https://localhost:6004/signout-oidc")
+                            new Uri($"{ServiceDefaultConfig.WebClientUrl}signout-oidc")
                         },
                         RedirectUris =
                         {
-                            new Uri("https://localhost:6004/signin-oidc")
+                            new Uri($"{ServiceDefaultConfig.WebClientUrl}signin-oidc")
                         },
                         Permissions =
                         {
@@ -59,72 +60,71 @@ namespace Server
                             Permissions.Scopes.Email,
                             Permissions.Scopes.Profile,
                             Permissions.Scopes.Roles,
-                            Permissions.Prefixes.Scope + "api1",
-                            Permissions.Prefixes.Scope + "api2"
+                            Permissions.Prefixes.Scope + ServiceDefaultConfig.Api1Id,
+                            Permissions.Prefixes.Scope + ServiceDefaultConfig.Api2Id
                         }
                     };
                     await manager.CreateAsync(descriptor, ct);
                 }
 
-                if (await manager.FindByClientIdAsync("api1") is null)
+                if (await manager.FindByClientIdAsync(ServiceDefaultConfig.Api1Id, ct) is null)
                 {
                     var descriptor = new OpenIddictApplicationDescriptor
                     {
-                        ClientId = "api1",
-                        ClientSecret = "846B62D0-DEF9-4215-A99D-86E6B8DAB342",
+                        ClientId = ServiceDefaultConfig.Api1Id,
+                        ClientSecret = ServiceDefaultConfig.Api1Secret,
                         Permissions =
                         {
                             Permissions.Endpoints.Introspection
                         }
                     };
-
-                    await manager.CreateAsync(descriptor);
+                    await manager.CreateAsync(descriptor, ct);
                 }
 
-                if (await manager.FindByClientIdAsync("api2") is null)
+                if (await manager.FindByClientIdAsync(ServiceDefaultConfig.Api2Id, ct) is null)
                 {
                     var descriptor = new OpenIddictApplicationDescriptor
                     {
-                        ClientId = "api2",
-                        ClientSecret = "846B62D0-DEF9-4215-A99D-86E6B8DAB342",
+                        ClientId = ServiceDefaultConfig.Api2Id,
+                        ClientSecret = ServiceDefaultConfig.Api2Secret,
                         Permissions =
                         {
                             Permissions.Endpoints.Introspection
                         }
                     };
 
-                    await manager.CreateAsync(descriptor);
+                    await manager.CreateAsync(descriptor, ct);
                 }
             }
 
-            async Task CretaeScopesAsync()
+            async Task CretaeScopesAsync(CancellationToken ct)
             {
                 var manager = scope
                     .ServiceProvider
                     .GetRequiredService<IOpenIddictScopeManager>();
 
-                if (await manager.FindByNameAsync("api1") is null)
+                if (await manager.FindByNameAsync(ServiceDefaultConfig.Api1Id, ct) is null)
                 {
                     await manager.CreateAsync(new OpenIddictScopeDescriptor
                     {
-                        Name = "api1",
+                        Name = ServiceDefaultConfig.Api1Id,
                         Resources =
                         {
-                            "api1"
+                            ServiceDefaultConfig.Api1Id
                         }
-                    });
+                    }, ct);
                 }
 
-                if (await manager.FindByNameAsync("api2") == null)
+                if (await manager.FindByNameAsync(ServiceDefaultConfig.Api2Id, ct) == null)
                 {
                     await manager.CreateAsync(new OpenIddictScopeDescriptor
                     {
-                        Name = "api2",
+                        Name = ServiceDefaultConfig.Api2Id,
                         Resources =
                         {
-                            "api2"
+                            ServiceDefaultConfig.Api2Id
                         }
-                    });
+                    }, ct);
                 }
             }
         }
