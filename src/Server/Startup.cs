@@ -53,6 +53,13 @@ namespace Server
                     {
                         a.UseDbContext<AppDbContext>();
                     });
+                    //core.UseMongoDb(a =>
+                    //{
+                    //    a.Configure(cfg =>
+                    //    {
+                            
+                    //    });
+                    //});
                 })
                 .AddServer(server =>
                 {
@@ -65,6 +72,11 @@ namespace Server
                     server.RegisterScopes("email", "profile", "roles");
 
                     server.AllowAuthorizationCodeFlow();
+
+                    ////
+                    server.AllowClientCredentialsFlow();
+                    server.SetTokenEndpointUris("");
+                    ////
 
                     server.AddEncryptionKey(
                         new SymmetricSecurityKey(
