@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Server.Controllers
 {
+    [Route("[controller]")]
     public class AccountController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
@@ -22,6 +23,7 @@ namespace Server.Controllers
         }
 
         [HttpGet]
+        [Route("login")]
         public IActionResult Login(string returnUrl)
         {
             return View(model: new LoginViewModel
